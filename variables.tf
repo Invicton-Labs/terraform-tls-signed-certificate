@@ -12,24 +12,28 @@ variable "acm_import" {
   description = "Boolean value of whether the generated and signed certificate should be imported into ACM. Defaults to false."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "key_algorithm" {
   description = "Algorithm to use for the private key. Options are 'RSA' or 'ECDSA'. Defaults to 'RSA'."
   type        = string
   default     = "RSA"
+  nullable    = false
 }
 
 variable "ecdsa_curve" {
   description = "Elliptic curve to use for the ECDSA algorithm. Has no effect unless the 'key_algorithm' variable is set to 'ECDSA'. Options are 'P224', 'P256', 'P384', or 'P521'. Defaults to 'P224'."
   type        = string
   default     = "P224"
+  nullable    = false
 }
 
 variable "key_bits" {
-  description = "Number of bits to use for the RSA private key. Defaults to 2048."
+  description = "Number of bits to use for the RSA private key. Has no effect unless the 'key_algorithm' variable is set to 'RSA'. Defaults to 2048."
   type        = number
   default     = 2048
+  nullable    = false
 }
 
 variable "certificate_acm_name" {
@@ -41,6 +45,7 @@ variable "certificate_acm_name" {
 variable "subject_common_name" {
   description = "The certificate subject's common name."
   type        = string
+  nullable    = false
 }
 
 variable "subject_organization" {
@@ -58,7 +63,8 @@ variable "subject_organizational_unit" {
 variable "subject_street_address" {
   description = "The certificate subject's street address (list of strings)."
   type        = list(string)
-  default     = null
+  default     = []
+  nullable    = false
 }
 
 variable "subject_locality" {
@@ -95,6 +101,7 @@ variable "validity_period_hours" {
   description = "How many hours the certificate should be valid for. Defaults to 8760 (1 year)."
   type        = number
   default     = 8760
+  nullable    = false
 }
 
 variable "dns_names" {
@@ -125,12 +132,14 @@ variable "is_ca_certificate" {
   description = "Boolean controlling whether the CA flag will be set in the generated certificate. Defaults to false, meaning that the certificate does not represent a certificate authority."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "set_subject_key_id" {
   description = "If true, the certificate will include the subject key identifier. Defaults to false, in which case the subject key identifier is not set at all."
   type        = bool
   default     = false
+  nullable    = false
 }
 
 variable "allowed_uses" {
@@ -159,4 +168,5 @@ variable "allowed_uses" {
     "microsoft_server_gated_crypto",
     "netscape_server_gated_crypto"
   ]
+  nullable = false
 }

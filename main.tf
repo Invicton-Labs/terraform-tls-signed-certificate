@@ -1,14 +1,16 @@
 // Create a private key for the cert
 resource "tls_private_key" "key" {
   algorithm   = var.key_algorithm
-  rsa_bits    = var.key_bits
+  rsa_bits    = var.key_algorithm == "RSA" ? var.key_bits : null
   ecdsa_curve = var.key_algorithm == "ECDSA" ? var.ecdsa_curve : null
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // If no CA was provided, create a self-signed cert
 resource "tls_self_signed_cert" "cert" {
   count           = var.certificate_authority == null ? 1 : 0
-  key_algorithm   = var.key_algorithm
   private_key_pem = tls_private_key.key.private_key_pem
   subject {
     common_name         = var.subject_common_name
@@ -29,12 +31,14 @@ resource "tls_self_signed_cert" "cert" {
   early_renewal_hours   = var.early_renewal_hours
   is_ca_certificate     = var.is_ca_certificate
   set_subject_key_id    = var.set_subject_key_id
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // If a CA was provided, create a certificate request
 resource "tls_cert_request" "cert" {
   count           = var.certificate_authority != null ? 1 : 0
-  key_algorithm   = var.key_algorithm
   private_key_pem = tls_private_key.key.private_key_pem
   subject {
     common_name         = var.subject_common_name
@@ -50,13 +54,15 @@ resource "tls_cert_request" "cert" {
   dns_names    = var.dns_names
   ip_addresses = var.ip_addresses
   uris         = var.uris
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // If a CA was provided, sign the certificate request
 resource "tls_locally_signed_cert" "cert" {
   count                 = var.certificate_authority != null ? 1 : 0
   cert_request_pem      = tls_cert_request.cert[0].cert_request_pem
-  ca_key_algorithm      = var.certificate_authority.private_key_algorithm
   ca_private_key_pem    = var.certificate_authority.private_key_pem
   ca_cert_pem           = var.certificate_authority.cert_pem
   validity_period_hours = var.validity_period_hours
@@ -64,6 +70,9 @@ resource "tls_locally_signed_cert" "cert" {
   early_renewal_hours   = var.early_renewal_hours
   is_ca_certificate     = var.is_ca_certificate
   set_subject_key_id    = var.set_subject_key_id
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 locals {
@@ -79,5 +88,8 @@ resource "aws_acm_certificate" "cert" {
   certificate_chain = local.certificate_chain_pem
   tags = {
     Name = var.certificate_acm_name != null ? var.certificate_acm_name : var.subject_common_name
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
